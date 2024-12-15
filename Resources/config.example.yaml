@@ -1,0 +1,399 @@
+license: # 激活码必填，否则无法使用，
+
+log-level: INFO # 日志等级，可选值：DEBUG/INFO/WARNING/ERROR/CRITICAL/DISABLE，越后的等级日志越严重，DISABLE 禁用日志并存放在 logs 目录下
+
+# admin: # ****** 管理员，不填删掉，首次启动自动设置管理员
+  # - 1234567890
+
+user: [] # ****** 用户名单
+
+network: # 网络
+  # httpProxy: "http://127.0.0.1:7890" # HTTP 代理，仅用于 Bot 拉取订阅，VPS 不需要
+  # socks5Proxy: "scoks5://http://127.0.0.1:7891" # SOCKS5 代理，仅用于 Bot 拉取订阅，VPS 不需要
+  userAgent: "ClashMetaForAndroid/2.8.9.Meta Mihomo/0.16" # UA 设置，影响订阅获取
+
+bot:
+  bot-token: null # ****** 首次启动必填
+  api-id: # 可选 Telegram api_id，默认内置 # https://my.telegram.org/auth?to=apps
+  api-hash: # 可选 Telegram api_hash，默认内置 # https://my.telegram.org/auth?to=apps
+  # proxy: scoks5://http://127.0.0.1:7891 # SOCKS5 代理，仅用于代理 Bot，VPS 不需要
+  ipv6: false # 是否使用 IPv6 连接
+  antiGroup: false
+  inviteGroup: [] # ****** invite 指令权限覆写群组白名单，群组 ID 以 -100 开头，填写对应群组 ID 后目标群组所有人都可以使用 invite 指令，默认只能 user 使用
+  strictMode: false # 严格模式，默认false，开启时 Bot 的按钮只允许触发消息对话的用户点击，否则所有 user 均可点击
+  bypassMode: false # 是否将 Bot 设置为旁路模式，设置为旁路模式后 Bot 原本内置的所有指令失效，取而代之仅生效“commands”配置的指令，关于旁路模式有什么用，请查阅 https://koipy.gitbook.io/koipy
+  parseMode: MARKDOWN # 文本解析模式，可选值：DEFAULT/MARKDOWN/HTML/DISABLED
+  scriptText: "" # 进度条文本
+  analyzeText: ""  # 分析进度条文本
+  speedText: "" # 速度进度条文本
+  bar: "=" # 进度条
+  bleft: "[" # 进度条
+  bright: "]" # 进度条
+  bspace: "  " # 进度条
+  cacheTime: 60 # 单位为秒，订阅缓存最大时长，默认 60 秒，一个订阅不会重复拉取，在 60 秒内使用缓存值，超过 60 秒重新获取
+  echoLimit: 0.8 # 单位为秒，限制响应速度，默认0.8秒，即 Bot 每 0.8 秒最多响应一条消息，每 0.8/2 秒内按钮最多响应一次
+  inviteBlacklistURL: [] # 邀请测试里禁止测试的 URL 链接远程更新地址，多个用逗号隔开，例： https://raw.githubusercontent.com/koipy-org/koihub/master/proxypool_url.txt
+  inviteBlacklistDomain: [] # 邀请测试里禁止测试包含的域名远程更新地址，多个用逗号隔开，例：https://raw.githubusercontent.com/koipy-org/koihub/master/proxypool_domain.txt
+  commands: # Bot 指令设置
+    - name: "invite" # 指令名称
+      text: "邀请测试" # 指令的提示文本，默认空时自动使用“name”的值
+      rule: "invite" # 将该指令升级为测试指令，写对应的规则名，会读取配置好的规则，读取不到则判定该指令为普通指令，相当于：/help /version 等
+      title: "节点测试 @fufu" # 绘图时任务标题
+      enable: true # 是否启用该指令，默认 true，未启用时无法使用该指令
+      pin: true # 是否固定指令，默认 false，固定指令后会始终显示在 Telegram 客户端的指令列表中
+      attachToInvite: true # 是否附加到 invite 指令中选择的按钮，让 invite 也能享受到此规则背后的 script 选择，默认 true
+    # - name: ""
+      # text: ""
+      # rule: ""
+      # title: ""
+      # enable: true
+      # pin: true
+      # attachToInvite: true
+
+slaveConfig: # 后端配置
+  default: '' # 默认后端设置，未实现
+  showID: true # 是否在选择后端页面展示后端来源
+  slaves: # 后端列表，注意是数组类型
+    - type: miaospeed # 固定值，目前只支持这个
+      comment: "null" # ****** 后端备注，运营商与带宽
+      id: "null" # ****** 后端来源
+      token: "null" # ****** 连接密码
+      address: "null" # ****** 后端地址
+      path: "/null" # ****** websocket 的连接路径，填写复杂的路径，防止路径被爆破，有效避免miaospeed后端服务被网络爬虫扫描到
+      skipCertVerify: true # 跳过证书验证
+      tls: true # 启用加密连接
+      invoker: "999114514" # Bot 调用者，删掉此行或者随便填一个字符串
+      buildtoken: "MIAOKO4|580JxAo049R|GEnERAl|1X571R930|T0kEN" # 默认编译 Token
+      hidden: false # 是否隐藏此后端
+      option: # 可选配置，请注意部分值设置得太大会不生效，比如 taskTimeout 设置成 10000 以上不会生效
+        downloadDuration: 8 # 单位为秒，测试时长
+        downloadThreading: 1 # 测速线程
+        pingAverageOver: 3 # Ping 多少次取平均
+        taskRetry: 3 # 单位为秒，后端任务重试
+        downloadURL: https://dl.google.com/dl/android/studio/install/3.4.1.0/android-studio-ide-183.5522156-windows.exe # 测速文件
+        pingAddress: https://cp.cloudflare.com/generate_204 # 延迟测试地址
+        stunURL: udp://stunserver2024.stunprotocol.org:3478 # STUN 地址，测试 UDP 连通性，格式：udp://host:port
+        taskTimeout: 2500 # 单位毫秒，后端任务超时判定时长
+        dnsServer: [] # 指定后端 DNS 服务器，用于解析节点域名，例：["119.29.29.29:53", "223.5.5.5:53"]
+        apiVersion: 1 # 后端 API 版本，默认为 2，设置为 0/1 可适配旧版后端兼容性，无必要不修改，若对接其它分支 miaospeed 设置为 0/1
+
+image:
+  speedFormat: "byte/decimal" # 速度结果绘图格式，可选值："byte/binary"、"byte/decimal"、"bit/binary"、"bit/decimal"，具体解释请查看文档
+  color: # 颜色配置
+    background: # 背景颜色
+      inbound: # 入口背景
+        alpha: 255 # 透明度
+        end-color: '#ffffff' # 透明度
+        label: 0 # 值
+        name: '' # 名称随意
+        value: '#ffffff'
+      outbound: #出口背景
+        alpha: 255
+        end-color: '#ffffff'
+        label: 0
+        name: ''
+        value: '#ffffff'
+      script: # 连通性测试图
+        alpha: 255
+        end-color: '#ffffff'
+        label: 0
+        name: ''
+        value: '#ffffff'
+      scriptTitle: # 连通性图标题栏颜色
+        alpha: 255
+        end-color: '#ffffff'
+        label: 0
+        name: ''
+        value: '#EAEAEA'
+      speed: # 速度图内容颜色
+        alpha: 255
+        end-color: '#ffffff'
+        label: 0
+        name: ''
+        value: '#ffffff'
+      speedTitle: # 速度图标题栏颜色
+        alpha: 255
+        end-color: '#ffffff'
+        label: 0
+        name: ''
+        value: '#EAEAEA'
+      topoTitle: # 拓扑图标题栏颜色
+        alpha: 255
+        end-color: '#ffffff'
+        label: 0
+        name: ''
+        value: '#EAEAEA'
+    delay: # 延迟配色
+    - label: 1 # 延迟的值， >1 就采用这个颜色 单位ms
+      name: '1'
+      value: '#e4f8f9'
+    - label: 50 # 延迟的值， >50 就采用这个颜色 单位ms
+      name: '2'
+      value: '#e4f8f9'
+    - label: 100 # 以此类推
+      name: '2'
+      value: '#bdedf1'
+    - label: 200
+      name: '3'
+      value: '#96e2e8'
+    - label: 300
+      name: '4'
+      value: '#78d5de'
+    - label: 500
+      name: '5'
+      value: '#67c2cf'
+    - label: 1000
+      name: '6'
+      value: '#61b2bd'
+    - label: 2000
+      name: '7'
+      value: '#466463'
+    - label: 0
+      name: '8'
+      value: '#8d8b8e'
+    ipriskHigh: # IP 风险颜色
+      alpha: 255
+      end-color: '#ffffff'
+      label: 0
+      name: ''
+      value: '#ffffff'
+    ipriskLow:
+      alpha: 255
+      end-color: '#ffffff'
+      label: 0
+      name: ''
+      value: '#ffffff'
+    ipriskMedium:
+      alpha: 255
+      end-color: '#ffffff'
+      label: 0
+      name: ''
+      value: '#ffffff'
+    ipriskVeryHigh:
+      alpha: 255
+      end-color: '#ffffff'
+      label: 0
+      name: ''
+      value: '#ffffff'
+    na: # na的颜色
+      alpha: 255
+      end-color: '#8d8b8e'
+      label: 0
+      name: ''
+      value: '#8d8b8e'
+    'no': # 解锁失败的颜色
+      alpha: 255
+      end-color: '#ee6b73'
+      label: 0
+      name: ''
+      value: '#ee6b73'
+    outColor: []
+    speed: # 速度值颜色
+    - label: 0.0
+      name: '1'
+      value: '#fae0e4'
+      alpha: 255
+      end_color: '#ffffff'
+    - label: 0.0
+      name: '2'
+      value: '#f7cad0'
+      alpha: 255
+      end_color: '#ffffff'
+    - label: 25.0
+      name: '3'
+      value: '#f9bec7'
+      alpha: 255
+      end_color: '#ffffff'
+    - label: 50.0
+      name: '4'
+      value: '#ff85a1'
+      alpha: 255
+      end_color: '#ffffff'
+    - label: 100.0
+      name: '5'
+      value: '#ff7096'
+      alpha: 255
+      end_color: '#ffffff'
+    - label: 150.0
+      name: '6'
+      value: '#ff5c8a'
+      alpha: 255
+      end_color: '#ffffff'
+    - label: 200.0
+      name: '7'
+      value: '#ff477e'
+      alpha: 255
+      end_color: '#ffffff'
+    wait:
+      alpha: 255
+      end-color: '#dcc7e1'
+      label: 0
+      name: ''
+      value: '#dcc7e1'
+    warn:
+      alpha: 255
+      end-color: '#fcc43c'
+      label: 0
+      name: ''
+      value: '#fcc43c'
+    'yes':
+      alpha: 255
+      end-color: '#bee47e'
+      label: 0
+      name: ''
+      value: '#bee47e'
+  compress: false # 是否压缩
+  emoji: # 是否开启 Emoji
+    enable: true
+    source: TwemojiLocalSource
+  endColorsSwitch: false
+  font: ./resources/alibaba-Regular.ttf #字体路径
+  nonCommercialWatermark:
+    alpha: 16
+    angle: -16.0
+    color:
+      alpha: 16
+      end-color: '#ffffff'
+      label: 0
+      name: ''
+      value: '#000000'
+    enable: false
+    row-spacing: 1
+    shadow: false
+    size: 64
+    start-y: 0
+    text: # 请勿用于商业用途
+    trace: false
+  speedEndColorSwitch: false # 是否开启渐变色
+  invert: false # 是否将图片取反色，与透明度模式不兼容，开启此项透明度将失效
+  pixelThreshold: 2500x3500 # 图片像素阈值，超过阈值则发送原图，否则发送压缩图片，发送压缩图有助于让TG客户端自动下载图片以提升视觉体验，格式：宽的像素x高的像素，例如：2500x3500
+  title: 节点测试 @fufu # 绘图标题
+  watermark: # 水印
+    alpha: 32 # 透明度
+    angle: -16.0 # 旋转角度
+    color: # 颜色
+      alpha: 16
+      end-color: '#ffffff'
+      label: 0
+      name: ''
+      value: '#000000'
+    enable: true #是否启用
+    row-spacing: 0 # 行间距
+    shadow: false # 暂时未实现
+    size: 64 # 水印大小
+    start-y: 0 # 开始坐标
+    text: fufu の NT Bot # 水印内容
+    trace: false # 是否开启 UID 追踪，测试图结果显示任务发起人的 UID
+
+runtime: # 测速任务可以动态调整的配置
+  entrance: false # 是否显示入口 IP 段
+  interval: 10 # 暂时无用
+  ipstack: true # 是否启用双栈检测
+  localip: false # 暂时无用
+  nospeed: false # 暂时无用
+  pingURL: https://www.gstatic.com/generate_204 # 延迟测试地址
+  speedFiles: # 速度测试的大文件下载地址，暂时只会读取第一个地址
+  - https://dl.google.com/dl/android/studio/install/3.4.1.0/android-studio-ide-183.5522156-windows.exe
+  speedNodes: 300 # 最大测速节点数量
+  speedThreads: 4 # 暂时无用
+  output: image # 输出类型，目前支持 image 和 json 两种
+  realtime: false # 是否实时渲染测试结果
+  disableSubCvt: false # 是否针对单次测试禁用订阅转换，默认 false，开启后，假如全局订阅转换开启，则单次测试不会进行订阅转换，配合 rule 或者指令参数使用
+
+scriptConfig:
+  scripts: # 脚本载入
+    - type: gofunc # 表示是 miaospeed 的内置实现
+      name: "TEST_PING_RTT" # 特殊保留名称，当设置为这些特殊保留值时会覆写程序内部的默认配置，更多的特殊保留值请参阅这里: https://github.com/airportr/miaospeed/blob/master/interfaces/matrix.go#L3
+      rank: -100 # 排序
+    # - type: gojajs # 表示 miaospeed 主流脚本类型
+      # name: "示例脚本" # 脚本名称
+      # rank: 0 # 排序，越小排在越前面
+      # content: | # 脚本内容
+      #   const C_NA = '142,140,142';
+      #   const C_UNL = '186,230,126';
+      #   const C_FAIL = '239,107,115';
+      #   const C_UNK = '92,207,230';
+      # 
+      #   function handler() {
+      #     return {
+      #         text: '失败',
+      #         background: C_UNK,
+      #     }
+      #   }
+    - type: gojajs
+      name: "Youtube"
+      rank: 0
+      content: "resources/scripts/builtin/youtube.js" # 也可以指定一个文件路径
+    - type: gojajs
+      name: "Bilibili"
+      rank: 6
+      content: "resources/scripts/builtin/bilibili.js"
+    - type: gojajs
+      name: "Disney+"
+      rank: 1
+      content: "resources/scripts/builtin/disney+.js"
+    - type: gojajs
+      name: "Tiktok"
+      rank: 3
+      content: "resources/scripts/builtin/tiktok.js"
+    - type: gojajs
+      name: "Spotify"
+      rank: 8
+      content: "resources/scripts/builtin/spotify.js"
+    - type: gojajs
+      name: "ChatGPT"
+      rank: 2
+      content: "resources/scripts/builtin/openai.js"
+    - type: gojajs
+      name: "Claude"
+      rank: 5
+      content: "resources/scripts/builtin/Claude.js"
+    - type: gojajs
+      name: "Copilot"
+      rank: 7
+      content: "resources/scripts/builtin/copilot.js"
+    - type: gojajs
+      name: "ASN"
+      rank: 10
+      content: "resources/scripts/builtin/dns.js"
+    - type: gojajs
+      name: "IP 风险"
+      rank: 11
+      content: "resources/scripts/builtin/iprisk.js"
+
+    # 以下为固定脚本名称，用于覆写内置的 GEOIP 脚本，脚本名称不可更改：
+    # - type: gojajs
+      # name: "GEOIP_INBOUND"
+      # rank: 0
+      # content: "YOUR_GEOIP_SCRIPT" # 默认的GEOIP脚本参见 https://github.com/AirportR/miaospeed/blob/master/engine/embeded/default_geoip.js
+
+# rules:
+  # - name: 订阅名1 # 规则名称
+  #   url: https://www.google.com  # 订阅链接
+  #   owner: 1111111111 # 规则创建者
+  #   slaveid: local # 写后端配置里设置的后端 ID
+  #   runtime: null # 支持主配置 runtime 的所有值
+  #   script: [] # 写你在后端配置里设置的脚本配置名称，也支持预保留的名称 TEST_PING_RTT 等
+#   - name: 订阅名2 # 规则名称
+  #   url: https://www.google2.com  # 订阅链接
+  #   owner: 2222222222 # 规则创建者
+
+subconverter: # 订阅转换
+  address: 127.0.0.1:25500 # 地址
+  enable: false # 是否启用
+  exclude: ''
+  include: ''
+  tls: false # 是否启用安全加密 HTTPS 协议，默认 false，若不知道就将 HTTPS 开头设为 true
+
+substore:
+  autoDeploy: false # 是否自动部署 Sub Store，默认 false，会自动下载 Sub Store 后端和对应的 javascrip 运行时(bun)，如果手动部署 Sub Store，设置为 false
+  backend: "http://127.0.0.1:3000/download/sub?target=ClashMeta" # 后端地址，Bot 会自动解析为 http://127.0.0.1:3000/download/sub
+  enable: false # 是否启用，默认 false
+  ua: "" # 自定义 UA，留空则使用默认 UA
+  path: "sub-store.bundle.js" # Sub Store 后端主程序文件路径，自动部署时会自动生成，请勿修改
+  jsRuntime: "/usr/bin/node" # js 运行时的可执行文件路径，默认留空，自动部署时会自动生成，请勿修改
+
+translation: # 翻译语言包
+  lang: zh-CN # 启用选项
+  resources: # 翻译包在哪加载
+    zh-CN: ./resources/i18n/zh-CN.yml # 键随便填，值填文件路径
