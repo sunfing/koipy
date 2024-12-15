@@ -59,7 +59,7 @@ slaveConfig: # 后端配置
       id: "null" # ****** 后端来源
       token: "null" # ****** 连接密码
       address: "null" # ****** 后端地址
-      path: "/null" # ****** websocket 的连接路径，填写复杂的路径，防止路径被爆破，有效避免miaospeed后端服务被网络爬虫扫描到
+      path: "/" # ****** websocket 连接路径，填写复杂的路径，防止路径被爆破，有效避免miaospeed后端服务被网络爬虫扫描到
       skipCertVerify: true # 跳过证书验证
       tls: true # 启用加密连接
       invoker: "999114514" # Bot 调用者，删掉此行或者随便填一个字符串
