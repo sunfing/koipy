@@ -1,11 +1,13 @@
-license: # 激活码必填，否则无法使用，
+# ******
+license: 1234567890 # 激活码必填，否则无法使用，
 
 log-level: INFO # 日志等级，可选值：DEBUG/INFO/WARNING/ERROR/CRITICAL/DISABLE，越后的等级日志越严重，DISABLE 禁用日志并存放在 logs 目录下
 
 # admin: # ****** 管理员，不填删掉，首次启动自动设置管理员
   # - 1234567890
 
-user: [] # ****** 用户名单
+user: # ****** 用户名单
+  - 1234567890
 
 network: # 网络
   # httpProxy: "http://127.0.0.1:7890" # HTTP 代理，仅用于 Bot 拉取订阅，VPS 不需要
@@ -13,7 +15,7 @@ network: # 网络
   userAgent: "ClashMetaForAndroid/2.8.9.Meta Mihomo/0.16" # UA 设置，影响订阅获取
 
 bot:
-  bot-token: null # ****** 首次启动必填
+  bot-token: 1234567890 # ****** 首次启动必填
   api-id: # 可选 Telegram api_id，默认内置 # https://my.telegram.org/auth?to=apps
   api-hash: # 可选 Telegram api_hash，默认内置 # https://my.telegram.org/auth?to=apps
   # proxy: scoks5://http://127.0.0.1:7891 # SOCKS5 代理，仅用于代理 Bot，VPS 不需要
@@ -55,11 +57,11 @@ slaveConfig: # 后端配置
   showID: true # 是否在选择后端页面展示后端来源
   slaves: # 后端列表，注意是数组类型
     - type: miaospeed # 固定值，目前只支持这个
-      comment: "null" # ****** 后端备注，运营商与带宽
-      id: "null" # ****** 后端来源
-      token: "null" # ****** 连接密码
-      address: "null" # ****** 后端地址
-      path: "/" # ****** websocket 连接路径，填写复杂的路径，防止路径被爆破，有效避免miaospeed后端服务被网络爬虫扫描到
+      comment: "1234567890" # ****** 后端备注，运营商与带宽
+      id: "1234567890" # ****** 后端来源
+      address: "1234567890" # ****** 后端地址
+      token: "1234567890" # ****** 连接密码
+      path: "/1234567890" # ****** Websocket 连接路径，填写复杂的路径防止被爆破，有效避免 Miaospeed 后端服务被网络爬虫扫描到
       skipCertVerify: true # 跳过证书验证
       tls: true # 启用加密连接
       invoker: "999114514" # Bot 调用者，删掉此行或者随便填一个字符串
@@ -75,7 +77,7 @@ slaveConfig: # 后端配置
         stunURL: udp://stunserver2024.stunprotocol.org:3478 # STUN 地址，测试 UDP 连通性，格式：udp://host:port
         taskTimeout: 2500 # 单位毫秒，后端任务超时判定时长
         dnsServer: [] # 指定后端 DNS 服务器，用于解析节点域名，例：["119.29.29.29:53", "223.5.5.5:53"]
-        apiVersion: 1 # 后端 API 版本，默认为 2，设置为 0/1 可适配旧版后端兼容性，无必要不修改，若对接其它分支 miaospeed 设置为 0/1
+        apiVersion: 1 # 后端 API 版本，默认为 2，设置为 0/1 可适配旧版后端兼容性，无必要不修改，若对接其它分支 Miaospeed 设置为 0/1
 
 image:
   speedFormat: "byte/decimal" # 速度结果绘图格式，可选值："byte/binary"、"byte/decimal"、"bit/binary"、"bit/decimal"，具体解释请查看文档
@@ -302,10 +304,10 @@ runtime: # 测速任务可以动态调整的配置
 
 scriptConfig:
   scripts: # 脚本载入
-    - type: gofunc # 表示是 miaospeed 的内置实现
+    - type: gofunc # 表示是 Miaospeed 的内置实现
       name: "TEST_PING_RTT" # 特殊保留名称，当设置为这些特殊保留值时会覆写程序内部的默认配置，更多的特殊保留值请参阅这里: https://github.com/airportr/miaospeed/blob/master/interfaces/matrix.go#L3
       rank: -100 # 排序
-    # - type: gojajs # 表示 miaospeed 主流脚本类型
+    # - type: gojajs # 表示 Miaospeed 主流脚本类型
       # name: "示例脚本" # 脚本名称
       # rank: 0 # 排序，越小排在越前面
       # content: | # 脚本内容
