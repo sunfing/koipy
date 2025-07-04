@@ -1,245 +1,209 @@
 #!/usr/bin/env bash
+# -*- coding: utf-8 -*-
 
+# 必须以 root 权限运行
 if [[ $EUID -ne 0 ]]; then
-    echo "错误：本脚本需要 root 权限执行。" 1>&2
+    echo "错误：本脚本需要 root 权限执行。" >&2
     exit 1
 fi
 
-# 创建 koipy 文件夹并下载 config.yaml
-setup_environment () {
+# 全局变量
+container_name=""
+
+setup_environment() {
     if [ ! -d "./koipy" ]; then
         mkdir -p ./koipy
         echo "创建了 koipy 文件夹。"
     fi
 
-    wget -O ./koipy/config.yaml https://raw.githubusercontent.com/sunfing/koipy/main/Resources/config.example.yaml
+    wget -O ./koipy/config.yaml https://raw.githubusercontent.com/sunfing/koipy/main/config.example.yaml
     echo "下载 config.yaml 文件。"
 }
 
-welcome () {
+welcome() {
     echo
     echo "安装即将开始"
-    echo "如果您想取消安装，"
-    echo "请在 5 秒钟内按 Ctrl+C 终止此脚本。"
+    echo "如果您想取消安装，请在 5 秒内按 Ctrl+C 终止脚本。"
     echo
     sleep 5
 }
 
-docker_check () {
+docker_check() {
     echo "正在检查 Docker 安装情况 . . ."
-    if command -v docker >> /dev/null 2>&1; then
-        echo "Docker 已安装，继续安装过程 . . ."
-    else
-        echo "Docker 未安装在此系统上"
-        echo "请安装 Docker 并将自己添加到 Docker 组，然后重新运行此脚本。"
+    if ! command -v docker &>/dev/null; then
+        echo "Docker 未安装，请安装 Docker 并将当前用户加入 docker 组。"
         exit 1
     fi
+    echo "Docker 已安装。"
 }
 
-access_check () {
-    echo "测试 Docker 环境 . . ."
+access_check() {
+    echo "测试 Docker 权限 . . ."
     if [ -w /var/run/docker.sock ]; then
-        echo "当前用户可以使用 Docker,继续安装过程 . . ."
+        echo "当前用户有权访问 Docker。"
     else
-        echo "当前用户无权访问 Docker,或者 Docker 没有运行。请添加自己到 Docker 组并重新运行此脚本。"
+        echo "当前用户无权访问 Docker 或 Docker 未运行，请检查。"
         exit 1
     fi
 }
 
-build_docker () {
-    printf "请输入容器的名称："
-    read -r container_name <&1
+build_docker() {
+    read -r -p "请输入容器名称：" container_name
     echo "正在拉取 Docker 镜像 . . ."
-    docker rm -f "$container_name" > /dev/null 2>&1
+    docker rm -f "$container_name" &>/dev/null || true
     docker pull koipy/koipy:latest
 }
 
-configure_bot () {
+configure_bot() {
     echo "请确保当前目录下有 koipy 文件夹。"
-    if [ -d "./koipy" ]; then
-        # License 配置
-        printf "请输入 License:"
-        read -r license <&1
-
-        # Bot 配置
-        printf "请输入 Bot Token:"
-        read -r bot_token <&1
-        printf "请输入 API ID:"
-        read -r api_id <&1
-        printf "请输入 API Hash:"
-        read -r api_hash <&1
-        printf "请输入代理地址(默认不使用):"
-        read -r proxy <&1
-        #proxy=${proxy:-"socks5://127.0.0.1:11112"}
-
-        # Network 配置
-        printf "请输入 HTTP 代理地址(默认不使用):"
-        read -r http_proxy <&1
-        printf "请输入 SOCKS5 代理地址(默认不使用):"
-        read -r socks5_proxy <&1
-        #socks5_proxy=${socks5_proxy:-"socks5://127.0.0.1:1080"}
-
-        # Slave Config 配置
-        printf "请输入 Slave ID(后端来源):"
-        read -r slave_id <&1
-        printf "请输入 Slave Token(Miaospeed 的连接 Token):"
-        read -r slave_token <&1
-        printf "请输入 Slave Address(后端地址，默认127.0.0.1:8765):"
-        read -r slave_address <&1
-        slave_address=${slave_address:-"127.0.0.1:8765"}
-        printf "请输入 Slave Path(websocket 连接路径，默认/):"
-        read -r slave_path <&1
-        slave_path=${slave_path:-"/"}
-        printf "请输入 Slave Comment(后端备注，运营商与带宽):"
-        read -r slave_comment <&1
-        printf "是否启用 Sub-Store(默认不启用 false):"
-        read -r substore_enable <&1
-        substore_enable=${substore_enable:-"false"}
-        printf "是否自动部署 Sub-Store(默认不启用 false):"
-        read -r substore_autoDeploy <&1
-        substore_autoDeploy=${substore_autoDeploy:-"false"}
-
-
-        # 更新 config.yaml 文件
-        if [[ -f "./koipy/config.yaml" ]]; then
-            if grep -q "^license: " ./koipy/config.yaml; then
-                sed -i.bak "s|^license: .*|license: $license|" ./koipy/config.yaml
-            else
-                echo "license: $license" >> ./koipy/config.yaml
-            fi
-            # 更新 bot 配置
-            sed -i.bak "s|^\(  bot-token: \).*|\1$bot_token|" ./koipy/config.yaml
-            sed -i.bak "s|^\(  api-id: \).*|\1\"$api_id\"|" ./koipy/config.yaml  # api-id 使用双引号
-            sed -i.bak "s|^\(  api-hash: \).*|\1$api_hash|" ./koipy/config.yaml
-            sed -i.bak "s|^\(  proxy: \).*|\1$proxy|" ./koipy/config.yaml
-            sed -i.bak "s|^\(  httpProxy: \).*|\1$http_proxy|" ./koipy/config.yaml
-            sed -i.bak "s|^\(  socks5Proxy: \).*|\1$socks5_proxy|" ./koipy/config.yaml
-            # 更新 slaveConfig
-            sed -i.bak "s|^\(    slave:\)|\1|" ./koipy/config.yaml
-            sed -i.bak "s|^\(      id: \).*|\1\"$slave_id\"|" ./koipy/config.yaml
-            sed -i.bak "s|^\(      token: \).*|\1'$slave_token'|" ./koipy/config.yaml
-            sed -i.bak "s|^\(      address: \).*|\1\"$slave_address\"|" ./koipy/config.yaml
-            sed -i.bak "s|^\(      path: \).*|\1$slave_path|" ./koipy/config.yaml
-            sed -i.bak "s|^\(      comment: \).*|\1\"$slave_comment\"|" ./koipy/config.yaml
-            # 更新 substore 配置
-            # 更新 substore 配置
-            if grep -q "substore:" ./koipy/config.yaml; then
-                sed -i.bak "/substore:/,/^ *[^ ]/{
-                    /^ *enable:/ s|: .*|: $substore_enable|;
-                }" ./koipy/config.yaml
-            else
-                echo -e "substore:\n  enable: $substore_enable" >> ./koipy/config.yaml
-            fi
-            if grep -q "autoDeploy:" ./koipy/config.yaml; then
-                sed -i.bak "s|^\( *autoDeploy: \).*|\1$substore_autoDeploy|" ./koipy/config.yaml
-            else
-                echo "  autoDeploy: $substore_autoDeploy" >> ./koipy/config.yaml
-            fi
-            echo "config.yaml 已更新。"
-        else
-            echo "缺少必要的配置文件，退出。"
-            exit 1
-        fi
-    else
-        echo "缺少必要的配置文件或目录，退出。"
+    if [ ! -d "./koipy" ]; then
+        echo "缺少 koipy 文件夹，退出。"
         exit 1
     fi
+
+    if [ ! -f "./koipy/config.yaml" ]; then
+        echo "缺少 config.yaml 文件，退出。"
+        exit 1
+    fi
+
+    echo "开始配置参数 . . ."
+    read -r -p "请输入 License: " license
+    read -r -p "请输入 Bot Token: " bot_token
+    read -r -p "请输入 API ID: " api_id
+    read -r -p "请输入 API Hash: " api_hash
+    read -r -p "请输入代理地址(默认不使用): " proxy
+    read -r -p "请输入 HTTP 代理地址(默认不使用): " http_proxy
+    read -r -p "请输入 SOCKS5 代理地址(默认不使用): " socks5_proxy
+    read -r -p "请输入 Slave ID: " slave_id
+    read -r -p "请输入 Slave Token: " slave_token
+    read -r -p "请输入 Slave Address(默认127.0.0.1:8765): " slave_address
+    slave_address=${slave_address:-"127.0.0.1:8765"}
+    read -r -p "请输入 Slave Path(默认/): " slave_path
+    slave_path=${slave_path:-"/"}
+    read -r -p "请输入 Slave Comment: " slave_comment
+    read -r -p "是否启用 Sub-Store (默认false): " substore_enable
+    substore_enable=${substore_enable:-"false"}
+    read -r -p "是否自动部署 Sub-Store (默认false): " substore_autoDeploy
+    substore_autoDeploy=${substore_autoDeploy:-"false"}
+
+    # 更新 config.yaml
+    sed -i.bak \
+        -e "s|^license: .*|license: $license|" \
+        -e "s|^\(  bot-token: \).*|\1$bot_token|" \
+        -e "s|^\(  api-id: \).*|\1\"$api_id\"|" \
+        -e "s|^\(  api-hash: \).*|\1$api_hash|" \
+        -e "s|^\(  proxy: \).*|\1$proxy|" \
+        -e "s|^\(  httpProxy: \).*|\1$http_proxy|" \
+        -e "s|^\(  socks5Proxy: \).*|\1$socks5_proxy|" \
+        -e "s|^\(      id: \).*|\1\"$slave_id\"|" \
+        -e "s|^\(      token: \).*|\1'$slave_token'|" \
+        -e "s|^\(      address: \).*|\1\"$slave_address\"|" \
+        -e "s|^\(      path: \).*|\1$slave_path|" \
+        -e "s|^\(      comment: \).*|\1\"$slave_comment\"|" \
+        ./koipy/config.yaml
+
+    # 处理 substore
+    if grep -q "substore:" ./koipy/config.yaml; then
+        sed -i.bak "/substore:/,/^ *[^ ]/ {
+            /^ *enable:/ s|: .*|: $substore_enable|
+            /^ *autoDeploy:/ s|: .*|: $substore_autoDeploy|
+        }" ./koipy/config.yaml
+    else
+        cat <<EOF >> ./koipy/config.yaml
+
+substore:
+  enable: $substore_enable
+  autoDeploy: $substore_autoDeploy
+EOF
+    fi
+
+    echo "config.yaml 已更新。"
 }
 
-start_docker () {
+start_docker() {
     echo "正在启动 Docker 容器 . . ."
     docker run -dit --restart=no --name="$container_name" --hostname="$container_name" \
-        -v ./koipy/config.yaml:/app/config.yaml \
-        --network host koipy/koipy:latest <&1
+        -v "$(pwd)/koipy/config.yaml:/app/config.yaml" \
+        --network host koipy/koipy:latest
     echo
-    echo "Docker 容器已启动。"
-    echo
+    echo "Docker 容器 $container_name 已启动。"
 }
 
-start_installation () {
-    setup_environment  # 创建文件夹和配置文件
+start_installation() {
+    setup_environment
     welcome
     docker_check
     access_check
     build_docker
-    configure_bot  # 调用配置 Bot Token 和 API 信息的函数
+    configure_bot
     start_docker
 }
 
-cleanup () {
-    printf "请输入容器的名称："
-    read -r container_name <&1
+cleanup() {
+    read -r -p "请输入容器名称：" container_name
     echo "开始删除 Docker 容器 . . ."
     if docker inspect "$container_name" &>/dev/null; then
         docker rm -f "$container_name" &>/dev/null
         echo "容器 $container_name 已删除。"
-        echo
-        show_online
     else
-        echo "不存在名为 $container_name 的容器，退出。"
-        exit 1
+        echo "容器 $container_name 不存在。"
     fi
+    echo
+    show_online
 }
 
-stop_koipy () {
-    printf "请输入容器的名称："
-    read -r container_name <&1
+stop_koipy() {
+    read -r -p "请输入容器名称：" container_name
     echo "正在停止 Docker 容器 . . ."
     if docker inspect "$container_name" &>/dev/null; then
         docker stop "$container_name" &>/dev/null
         echo "容器 $container_name 已停止。"
-        echo
-        show_online
     else
-        echo "不存在名为 $container_name 的容器，退出。"
-        exit 1
+        echo "容器 $container_name 不存在。"
     fi
+    echo
+    show_online
 }
 
-start_koipy () {
-    printf "请输入容器的名称："
-    read -r container_name <&1
+start_koipy() {
+    read -r -p "请输入容器名称：" container_name
     echo "正在启动 Docker 容器 . . ."
     if docker inspect "$container_name" &>/dev/null; then
         docker start "$container_name" &>/dev/null
         echo "容器 $container_name 已启动。"
-        echo
-        show_online
     else
-        echo "不存在名为 $container_name 的容器，退出。"
-        exit 1
+        echo "容器 $container_name 不存在。"
     fi
+    echo
+    show_online
 }
 
-restart_koipy () {
-    printf "请输入容器的名称："
-    read -r container_name <&1
+restart_koipy() {
+    read -r -p "请输入容器名称：" container_name
     echo "正在重新启动 Docker 容器 . . ."
     if docker inspect "$container_name" &>/dev/null; then
         docker restart "$container_name" &>/dev/null
         echo "容器 $container_name 已重新启动。"
-        echo
-        show_online
     else
-        echo "不存在名为 $container_name 的容器，退出。"
-        exit 1
+        echo "容器 $container_name 不存在。"
     fi
+    echo
+    show_online
 }
 
-reinstall_koipy () {
+reinstall_koipy() {
     cleanup
     build_docker
     start_docker
-    data_persistence
 }
 
-show_online () {
-    echo "一键脚本出现任何问题请转手动搭建"
-    echo ""
-    echo ""
+show_online() {
+    echo
+    echo "一键脚本出现任何问题请转手动搭建，我爱莫能助。"
+    echo
     echo "欢迎使用 Koipy Docker 一键安装脚本。"
     echo
-    echo "请选择您需要进行的操作:"
+    echo "请选择需要进行的操作:"
     echo "  1) 安装 Koipy"
     echo "  2) 卸载 Koipy"
     echo "  3) 停止 Koipy"
@@ -248,38 +212,20 @@ show_online () {
     echo "  6) 重装 Koipy"
     echo "  7) 退出脚本"
     echo
-    echo "     Version：1.0.0"
+    echo "Version：1.0.0"
     echo
-    echo -n "请输入编号: "
-    read -r N <&1
+    read -r -p "请输入编号: " N
     case $N in
-        1)
-            start_installation
-            ;;
-        2)
-            cleanup
-            ;;
-        3)
-            stop_koipy
-            ;;
-        4)
-            start_koipy
-            ;;
-        5)
-            restart_koipy
-            ;;
-        6)
-            reinstall_koipy
-            ;;
-        7)
-            exit 0
-            ;;
-        *)
-            echo "输入错误!"
-            sleep 5s
-            show_online
-            ;;
-    esac 
+        1) start_installation ;;
+        2) cleanup ;;
+        3) stop_koipy ;;
+        4) start_koipy ;;
+        5) restart_koipy ;;
+        6) reinstall_koipy ;;
+        7) exit 0 ;;
+        *) echo "输入错误，请重新选择。" ; sleep 2; show_online ;;
+    esac
 }
 
+# 启动菜单
 show_online
