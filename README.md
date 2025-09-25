@@ -1,2 +1,2 @@
-# Koipy
-A Frontend For Telegram Node Test Bot!
+# koipy
+Koipy - A Frontend For Telegram Node Test Bot!
